@@ -31,6 +31,7 @@ class ImageMagicConan(ConanFile):
                "with_webp": [True, False],
                "with_xml2": [True, False],
                "with_freetype": [True, False],
+               "with_djvu": [True, False],
                "utilities": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
@@ -49,6 +50,7 @@ class ImageMagicConan(ConanFile):
                        "with_webp": False,
                        "with_xml2": True,
                        "with_freetype": True,
+					   "with_djvu": False,
                        "utilities": True}
     exports_sources = "patches/*"
 
@@ -111,6 +113,9 @@ class ImageMagicConan(ConanFile):
             self.requires('libxml2/2.9.10')
         if self.options.with_freetype:
             self.requires('freetype/2.10.4')
+        #TODO add when available
+        if self.options.with_djvu:
+           self.output.warn("There is no djvu package available on Conan (yet). This recipe will use the one present on the system (if available).")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version]["source"])
@@ -269,6 +274,7 @@ class ImageMagicConan(ConanFile):
         args.append('--with-xml=yes' if self.options.with_xml2 else '--with-xml=no')
         args.append('--with-freetype=yes' if self.options.with_freetype else '--with-freetype=no')
         args.append('--with-utilities=yes' if self.options.utilities else '--with-utilities=no')
+        args.append('--with-djvu=yes' if self.options.with_djvu else '--with-djvu=no')
         self._autotools.configure(args=args)
         return self._autotools
 
