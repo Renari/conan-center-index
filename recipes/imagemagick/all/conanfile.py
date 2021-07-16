@@ -316,6 +316,7 @@ class ImageMagicConan(ConanFile):
             return '%s-%s.Q%s%s' % (library, self._major, self.options.quantum_depth, suffix)
 
     def package_info(self):
+        # FIXME model official FindImageMagick https://cmake.org/cmake/help/latest/module/FindImageMagick.html
         self.env_info.path.append(os.path.join(self.package_folder, "bin"))
 
         core_requires = []
