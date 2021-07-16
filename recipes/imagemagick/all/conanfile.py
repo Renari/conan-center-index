@@ -351,7 +351,7 @@ class ImageMagicConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.components["MagickCore"].libs.append(self._libname('coders'))
         if self.settings.os == 'Linux':
-            self.cpp_info.components["MagickCore"].libs.append('pthread')
+            self.cpp_info.components["MagickCore"].system_libs.append('pthread')
 
         self.cpp_info.components["MagickCore"].defines.append('MAGICKCORE_QUANTUM_DEPTH=%s' % self.options.quantum_depth)
         self.cpp_info.components["MagickCore"].defines.append('MAGICKCORE_HDRI_ENABLE=%s' % int(bool(self.options.hdri)))
