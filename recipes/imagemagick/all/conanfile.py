@@ -50,7 +50,7 @@ class ImageMagicConan(ConanFile):
                        "with_webp": False,
                        "with_xml2": True,
                        "with_freetype": True,
-					   "with_djvu": False,
+                       "with_djvu": False,
                        "utilities": True}
     exports_sources = "patches/*"
 
@@ -113,9 +113,9 @@ class ImageMagicConan(ConanFile):
             self.requires('libxml2/2.9.10')
         if self.options.with_freetype:
             self.requires('freetype/2.10.4')
-        #TODO add when available
+        # TODO add when available
         if self.options.with_djvu:
-           self.output.warn("There is no djvu package available on Conan (yet). This recipe will use the one present on the system (if available).")
+            self.output.warn("There is no djvu package available on Conan (yet). This recipe will use the one present on the system (if available).")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version]["source"])
@@ -317,13 +317,55 @@ class ImageMagicConan(ConanFile):
 
     def package_info(self):
         self.env_info.path.append(os.path.join(self.package_folder, "bin"))
-        self.cpp_info.includedirs = [os.path.join('include', 'ImageMagick-%s' % self._major)]
-        self.cpp_info.libs = [self._libname(m) for m in self._modules]
+
+        core_requires = []
+        if self.options.with_zlib:
+            core_requires.append('zlib::zlib')
+        if self.options.with_bzlib:
+            core_requires.append('bzip2::bzip2')
+        if self.options.with_lzma:
+            core_requires.append('xz_utils::xz_utils')
+        if self.options.with_lcms:
+            core_requires.append('lcms::lcms')
+        if self.options.with_openexr:
+            core_requires.append('openexr::openexr')
+        if self.options.with_jpeg:
+            core_requires.append("libjpeg::libjpeg")
+        if self.options.with_openjp2:
+            core_requires.append('openjpeg::openjpeg')
+        if self.options.with_pango:
+            core_requires.append('pango::pango')
+        if self.options.with_png:
+            core_requires.append('libpng::libpng')
+        if self.options.with_tiff:
+            core_requires.append('libtiff::libtiff')
+        if self.options.with_webp:
+            core_requires.append('libwebp::libwebp')
+        if self.options.with_xml2:
+            core_requires.append('libxml2::libxml2')
+        if self.options.with_freetype:
+            core_requires.append('freetype::freetype')
+
         if self._is_msvc:
             if not self.options.shared:
-                self.cpp_info.libs.append(self._libname('coders'))
+                self.cpp_info.components["MagickCore"].libs.append(self._libname('coders'))
         if self.settings.os == 'Linux':
-            self.cpp_info.libs.append('pthread')
-        self.cpp_info.defines.append('MAGICKCORE_QUANTUM_DEPTH=%s' % self.options.quantum_depth)
-        self.cpp_info.defines.append('MAGICKCORE_HDRI_ENABLE=%s' % int(bool(self.options.hdri)))
-        self.cpp_info.defines.append('_MAGICKDLL_=1' if self.options.shared else '_MAGICKLIB_=1')
+            self.cpp_info.components["MagickCore"].libs.append('pthread')
+
+        self.cpp_info.components["MagickCore"].defines.append('MAGICKCORE_QUANTUM_DEPTH=%s' % self.options.quantum_depth)
+        self.cpp_info.components["MagickCore"].defines.append('MAGICKCORE_HDRI_ENABLE=%s' % int(bool(self.options.hdri)))
+        self.cpp_info.components["MagickCore"].defines.append('_MAGICKDLL_=1' if self.options.shared else '_MAGICKLIB_=1')
+
+        imagemagick_include_dir = "include/ImageMagick-%s" % tools.Version(self.version).major
+
+        self.cpp_info.components["MagickCore"].includedirs = [imagemagick_include_dir]
+        self.cpp_info.components["MagickCore"].libs.append(self._libname('MagickCore'))
+        self.cpp_info.components["MagickCore"].requires = core_requires
+
+        self.cpp_info.components["MagickWand"].includedirs = [imagemagick_include_dir + "/MagickWand"]
+        self.cpp_info.components["MagickWand"].libs = [self._libname('MagickWand')]
+        self.cpp_info.components["MagickWand"].requires = ["MagickCore"]
+
+        self.cpp_info.components["Magick++"].includedirs = [imagemagick_include_dir + "/Magick++"]
+        self.cpp_info.components["Magick++"].libs = [self._libname('Magick++')]
+        self.cpp_info.components["Magick++"].requires = ["MagickWand"]
