@@ -361,11 +361,14 @@ class ImageMagicConan(ConanFile):
         self.cpp_info.components["MagickCore"].includedirs = [imagemagick_include_dir]
         self.cpp_info.components["MagickCore"].libs.append(self._libname('MagickCore'))
         self.cpp_info.components["MagickCore"].requires = core_requires
+        self.cpp_info.components["MagickCore"].names["pkg_config"] = ["MagicCore", self._libname('MagickCore')]
 
         self.cpp_info.components["MagickWand"].includedirs = [imagemagick_include_dir + "/MagickWand"]
         self.cpp_info.components["MagickWand"].libs = [self._libname('MagickWand')]
         self.cpp_info.components["MagickWand"].requires = ["MagickCore"]
+        self.cpp_info.components["MagickWand"].names["pkg_config"] = ["MagickWand", self._libname('MagickWand')]
 
         self.cpp_info.components["Magick++"].includedirs = [imagemagick_include_dir + "/Magick++"]
         self.cpp_info.components["Magick++"].libs = [self._libname('Magick++')]
         self.cpp_info.components["Magick++"].requires = ["MagickWand"]
+        self.cpp_info.components["Magick++"].names["pkg_config"] = ["Magick++", self._libname('Magick++')]
